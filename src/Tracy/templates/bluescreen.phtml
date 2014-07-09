@@ -12,7 +12,6 @@
  * @param  string $title
  * @param  string $source
  * @param  bool $sourceIsUrl
- * @param  string $skipError
  * @return void
  */
 
@@ -35,9 +34,9 @@ $counter = 0;
 	?> -->
 
 	<style type="text/css" class="tracy-debug">
-	<?php echo preg_replace('#\s+#', ' ', file_get_contents(__DIR__ . '/bluescreen.css')) ?>
+	<?php require __DIR__ . '/bluescreen.css' ?>
 	</style>
-	<script>document.documentElement.className+=' tracy-js'</script>
+	<script>document.documentElement.className+=' js'</script>
 </head>
 
 
@@ -49,8 +48,7 @@ $counter = 0;
 			<h1><?php echo htmlspecialchars($title), ($exception->getCode() ? ' #' . $exception->getCode() : '') ?></h1>
 
 			<p><?php echo htmlspecialchars($exception->getMessage(), ENT_IGNORE) ?>
-			<a href="https://www.google.com/search?sourceid=tracy&amp;q=<?php echo urlencode($title . ' ' . preg_replace('#\'.*\'|".*"#Us', '', $exception->getMessage())) ?>" rel="noreferrer">search&#x25ba;</a>
-			<?php if ($skipError): ?><a href="<?php echo htmlSpecialChars($skipError, ENT_IGNORE | ENT_QUOTES) ?>">skip error&#x25ba;</a><?php endif ?></p>
+			<a href="https://www.google.com/search?sourceid=tracy&amp;q=<?php echo urlencode($title . ' ' . preg_replace('#\'.*\'|".*"#Us', '', $exception->getMessage())) ?>" rel="noreferrer">search&#x25ba;</a></p>
 		</div>
 
 		<?php if ($prev = $exception->getPrevious()): ?>
@@ -120,7 +118,7 @@ $counter = 0;
 						<i>inner-code</i><?php if (isset($row['line'])) echo ':', $row['line'] ?>
 					<?php endif ?>
 
-					<?php if (isset($row['file']) && is_file($row['file'])): ?><a href="#tracyBsSrc<?php echo "$level-$key" ?>" class="tracy-toggle<?php if ($expanded !== $key) echo ' tracy-collapsed' ?>">source</a>&nbsp; <?php endif ?>
+					<?php if (isset($row['file']) && is_file($row['file'])): ?><a href="#tracyBsSrc<?php echo "$level-$key" ?>" class="tracy-toggle tracy-collapsed">source</a>&nbsp; <?php endif ?>
 
 					<?php if (isset($row['object'])) echo "<a href='#tracyBsObj$level-$key' class='tracy-toggle tracy-collapsed'>" ?>
 					<?php if (isset($row['class'])) echo htmlspecialchars($row['class'] . $row['type']) ?>
@@ -131,11 +129,11 @@ $counter = 0;
 					</p>
 
 					<?php if (isset($row['file']) && is_file($row['file'])): ?>
-						<div <?php if ($expanded !== $key) echo 'class="tracy-collapsed"' ?> id="tracyBsSrc<?php echo "$level-$key" ?>"><?php echo self::highlightFile($row['file'], $row['line']) ?></div>
+						<div <?php if ($expanded !== $key) echo 'class="tracy-collapsed"'; ?> id="tracyBsSrc<?php echo "$level-$key" ?>"><?php echo self::highlightFile($row['file'], $row['line']) ?></div>
 					<?php endif ?>
 
 					<?php if (isset($row['object'])): ?>
-						<div class="tracy-collapsed outer" id="tracyBsObj<?php echo "$level-$key" ?>"><?php echo Dumper::toHtml($row['object'], array(Dumper::LIVE => TRUE)) ?></div>
+						<div class="tracy-collapsed outer" id="tracyBsObj<?php echo "$level-$key" ?>"><?php echo Dumper::toHtml($row['object']); ?></div>
 					<?php endif ?>
 
 					<?php if (!empty($row['args'])): ?>
@@ -150,7 +148,7 @@ $counter = 0;
 						}
 						foreach ($row['args'] as $k => $v) {
 							echo '<tr><th>', htmlspecialchars(isset($params[$k]) ? '$' . $params[$k]->name : "#$k"), '</th><td>';
-							echo Dumper::toHtml($v, array(Dumper::LOCATION => Dumper::LOCATION_CLASS, Dumper::LIVE => TRUE));
+							echo Dumper::toHtml($v, array(Dumper::LOCATION => Dumper::LOCATION_CLASS));
 							echo "</td></tr>\n";
 						}
 						?>
@@ -173,7 +171,7 @@ $counter = 0;
 			<table>
 			<?php
 			foreach ($ex->context as $k => $v) {
-					echo '<tr><th>$', htmlspecialchars($k), '</th><td>', Dumper::toHtml($v, array(Dumper::LOCATION => Dumper::LOCATION_CLASS, Dumper::LIVE => TRUE)), "</td></tr>\n";
+					echo '<tr><th>$', htmlspecialchars($k), '</th><td>', Dumper::toHtml($v, array(Dumper::LOCATION => Dumper::LOCATION_CLASS)), "</td></tr>\n";
 			}
 			?>
 			</table>
@@ -219,7 +217,7 @@ $counter = 0;
 			<?php else: ?>
 			<table>
 			<?php
-			foreach ($_SESSION as $k => $v) echo '<tr><th>', htmlspecialchars($k), '</th><td>', $k === '__NF' ? '<i>Nette Session</i>' : Dumper::toHtml($v, array(Dumper::LOCATION => Dumper::LOCATION_CLASS, Dumper::LIVE => TRUE)), "</td></tr>\n";
+			foreach ($_SESSION as $k => $v) echo '<tr><th>', htmlspecialchars($k), '</th><td>', $k === '__NF' ? '<i>Nette Session</i>' : Dumper::toHtml($v, array(Dumper::LOCATION => Dumper::LOCATION_CLASS)), "</td></tr>\n";
 			?>
 			</table>
 			<?php endif ?>
@@ -231,7 +229,7 @@ $counter = 0;
 			<div id="tracyBsPnl<?php echo $counter ?>" class="outer">
 			<table>
 			<?php
-			foreach ($_SESSION['__NF']['DATA'] as $k => $v) echo '<tr><th>', htmlspecialchars($k), '</th><td>', Dumper::toHtml($v, array(Dumper::LOCATION => Dumper::LOCATION_CLASS, Dumper::LIVE => TRUE)), "</td></tr>\n";
+			foreach ($_SESSION['__NF']['DATA'] as $k => $v) echo '<tr><th>', htmlspecialchars($k), '</th><td>', Dumper::toHtml($v, array(Dumper::LOCATION => Dumper::LOCATION_CLASS)), "</td></tr>\n";
 			?>
 			</table>
 			</div>
@@ -342,19 +340,68 @@ $counter = 0;
 	</div>
 </div>
 
-<script>
-(function() {
-	if (!document.addEventListener) {
-		document.getElementById('tracyBluescreenError').innerHTML += '<div id=tracyBluescreenIEWarning>Warning: Tracy requires IE 9+<\/div>';
-		return;
+<script type="text/javascript">
+(function(){
+	var bs = document.getElementById('tracyBluescreen');
+	document.body.appendChild(bs);
+	document.onkeyup = function(e) {
+		e = e || window.event;
+		if (e.keyCode == 27 && !e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey) {
+			document.getElementById('tracyBluescreenIcon').click();
+		}
+	};
+
+	for (var i = 0, styles = []; i < document.styleSheets.length; i++) {
+		var style = document.styleSheets[i];
+		if ((style.owningElement || style.ownerNode).className !== 'tracy-debug') {
+			style.oldDisabled = style.disabled;
+			style.disabled = true;
+			styles.push(style);
+		}
 	}
-	<?php readfile(__DIR__ . '/Tracy.js') ?>
-	<?php readfile(__DIR__ . '/dumper.js') ?>
-	<?php readfile(__DIR__ . '/bluescreen.js') ?>
+
+	bs.onclick = function(e) {
+		e = e || window.event;
+
+		if (e.ctrlKey) {
+			for (var link = e.target; link && (!link.getAttribute || !link.getAttribute('data-tracy-href')); link = link.parentNode) {}
+			if (link) {
+				location.href = link.getAttribute('data-tracy-href');
+				return false;
+			}
+		}
+
+		if (e.shiftKey || e.altKey || e.ctrlKey || e.metaKey) {
+			return;
+		}
+
+		for (var link = e.target || e.srcElement; link && (!link.tagName || !link.className.match(/(^|\s)tracy-toggle(\s|$)/)); link = link.parentNode) {}
+		if (!link) {
+			return true;
+		}
+
+		var collapsed = link.className.match(/(^|\s)tracy-collapsed(\s|$)/),
+			ref = link.getAttribute('data-ref') || link.getAttribute('href', 2),
+			dest;
+
+		if (ref && ref !== '#') {
+			dest = document.getElementById(ref.substring(1));
+		} else {
+			for (dest = link.nextSibling; dest && dest.nodeType !== 1; dest = dest.nextSibling) {}
+		}
+
+		link.className = (collapsed ? link.className.replace(/(^|\s)tracy-collapsed(\s|$)/, ' ') : link.className + ' tracy-collapsed').replace(/^\s+|\s+$/g,'');
+		dest.className = (collapsed ? dest.className.replace(/(^|\s)tracy-collapsed(\s|$)/, ' ') : dest.className + ' tracy-collapsed').replace(/^\s+|\s+$/g,'');
+
+		if (link.id === 'tracyBluescreenIcon') {
+			for (i = 0; i < styles.length; i++) {
+				styles[i].disabled = collapsed ? true : styles[i].oldDisabled;
+			}
+		}
+		e.preventDefault ? e.preventDefault() : e.returnValue = false;
+		e.stopPropagation ? e.stopPropagation() : e.cancelBubble = true;
+	};
 })();
-</script>
-<script>
-Tracy && Tracy.Dumper.init(<?php echo json_encode(Dumper::fetchLiveData()) ?>);
 </script>
 </body>
 </html>
