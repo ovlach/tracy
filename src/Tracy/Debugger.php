@@ -264,7 +264,7 @@ class Debugger
 	{
 		if (self::getLogger()->directory) {
 			return self::getLogger()->log($message, $priority);
-		}	
+		}
 	}
 
 
