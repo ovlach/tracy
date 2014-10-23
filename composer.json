@@ -20,6 +20,9 @@
 	"require-dev": {
 		"nette/tester": "~1.0"
 	},
+	"replace": {
+		"tracy/tracy": "*"
+	},
 	"autoload": {
 		"classmap": ["src/Tracy"],
 		"files": ["src/shortcuts.php"]
