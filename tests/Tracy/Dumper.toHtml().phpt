@@ -24,6 +24,7 @@ class Test
 Assert::match( '<pre class="tracy-dump"><span class="tracy-dump-null">NULL</span>
 </pre>', Dumper::toHtml(NULL) );
 
+
 Assert::match( '<pre class="tracy-dump"><span class="tracy-dump-bool">TRUE</span>
 </pre>', Dumper::toHtml(TRUE) );
 
