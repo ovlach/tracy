@@ -53,6 +53,10 @@ class Debugger
 	/** @var array of callables specifies the functions that are automatically called after fatal error */
 	public static $onFatalError = array();
 
+
+	/** @var bool {@link Debugger::enable()} */
+	public static $displayBar = NULL;
+
 	/********************* Debugger::dump() ****************d*g**/
 
 	/** @var int  how many nested levels of array/object properties display {@link Debugger::dump()} */
@@ -208,7 +212,7 @@ class Debugger
 			}
 
 			self::exceptionHandler($exception, FALSE);
-		} elseif (!connection_aborted() && !self::$productionMode && self::isHtmlMode()) {
+		} elseif (!connection_aborted() && !self::$productionMode && self::isHtmlMode() && self::$displayBar !== FALSE) {
 			self::getBar()->render();
 		}
 	}
