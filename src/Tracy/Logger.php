@@ -53,9 +53,11 @@ class Logger implements ILogger
 	 */
 	public function log($message, $priority = self::INFO)
 	{
-		if (!$this->directory) {
-			throw new \LogicException('Directory is not specified.');
-		} elseif (!is_dir($this->directory)) {
+		if (empty($this->directory))
+		{
+			return NULL;
+		}
+		if (!is_dir($this->directory)) {
 			throw new \RuntimeException("Directory '$this->directory' is not found or is not directory.");
 		}
 
