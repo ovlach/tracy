@@ -11,9 +11,7 @@ use Tracy\Debugger,
 require __DIR__ . '/../bootstrap.php';
 
 
-Assert::exception(function() {
-	Debugger::log('Hello');
-}, 'LogicException', "Directory is not specified.");
+Assert::null(Debugger::log('Hello'));
 
 
 // no error
